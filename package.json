@@ -1,0 +1,18 @@
+{
+  "name": "fullstack-project",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [
+    "JavaScript",
+    "backend",
+    "MERN",
+    "stack"
+  ],
+  "license": "ISC",
+  "author": "Aryan Kumar",
+  "type": "models",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
