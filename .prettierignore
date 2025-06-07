@@ -1,0 +1,7 @@
+/node_modules
+/.vscoad
+./dist
+
+*.env
+.env
+.env.*
