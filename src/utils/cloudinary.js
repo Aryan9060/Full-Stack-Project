@@ -21,7 +21,9 @@ const uploadCloudinary = async (localpath) => {
     console.log("This file has been uploaded to Cloudinary:", res.url);
     return res;
   } catch (error) {
+    // Delete the local file if an error occurs during upload
     fs.unlinkSync(localpath);
+
     console.error("Error uploading file to Cloudinary:", error);
     return null;
   }
