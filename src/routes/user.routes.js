@@ -6,16 +6,16 @@ const router = Router();
 
 // Route to register a new user
 router.route("/register").post(
-  upload.fields(
+  upload.fields([
     {
-      name: "avatar",
+      name: "avater",
       maxCount: 1,
     },
     {
       name: "coverImage",
       maxCount: 1,
-    }
-  ),
+    },
+  ]),
   registerUser
 );
 

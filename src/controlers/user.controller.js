@@ -17,10 +17,12 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // validation and data extraction
   const { fullName, email, password, username } = req.body;
-  console.log({ fullName, email, password, username });
+
+  console.log("Reruest from body :-", req.body);
+  console.log("Reruest from file :-", req.files);
 
   if (
-    [fullName, email, password, username].some((field) => field.trim() === "")
+    [fullName, email, password, username].some((field) => field?.trim() === "")
   ) {
     throw new ApiError(400, "All fields are required");
   }
@@ -35,7 +37,12 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // upload images to cloudinary and save url in db
   const avatarLoacalPath = req.files?.avater[0]?.path;
-  const coverImageLocalPath = req.files?.coverImage[0]?.path;
+  let coverImageLocalPath
+if(req.files&& Array.isArray(req.files.coverImage)&& req.files.coverImage.length>0){
+  coverImageLocalPath = req.files.coverImage[0].path;
+}
+
+
   if (!avatarLoacalPath) {
     throw new ApiError(400, "Avater file is required");
   }
@@ -51,7 +58,7 @@ const registerUser = asyncHandler(async (req, res) => {
     fullName,
     email,
     password,
-    username: username.toLowercase(),
+    username: username.toLowerCase(),
     avatar: avatar.secure_url,
     coverImage: coverImage?.secure_url || "",
   });
@@ -66,7 +73,7 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   return res
-    .statuse(201)
+    .status(201)
     .json(new ApiResponse(201, createdUser, "User registered successfully"));
 });
 
