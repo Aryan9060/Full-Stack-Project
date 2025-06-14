@@ -1,5 +1,15 @@
 import { Router } from "express";
-import { loginUser, logoutUser, refreshAccessToken, registerUser } from "../controlers/user.controller.js";
+import {
+  chengeCurrentPassword,
+  getCurrentUser,
+  getUserChannelProfile,
+  getWatchHistory,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  registerUser,
+  updateAccountDetails,
+} from "../controlers/user.controller.js";
 import { upload } from "../middlewares/multer.js";
 import { verifyJWT } from "../middlewares/auth.middlewate.js";
 
@@ -20,11 +30,21 @@ router.route("/register").post(
   registerUser
 );
 
-
 router.route("/login").post(loginUser);
 
 // secure route
 router.route("/logout").post(verifyJWT, logoutUser);
-router.route('/refresh-token').post(refreshAccessToken)
+router.route("/refresh-token").post(refreshAccessToken);
+router.route("/change-password").put(verifyJWT, chengeCurrentPassword); //post
+router.route("/current-user").get(verifyJWT, getCurrentUser);
+router.route("/update-account").put(verifyJWT, updateAccountDetails); //patch
+router
+  .route("/upload-avatar")
+  .put(verifyJWT, upload.single("avater"), updateAccountDetails); //patch
+router
+  .route("/upload-cover-image")
+  .put(verifyJWT, upload.single("coverImage"), updateAccountDetails);
+router.route("/channel/:username").get(verifyJWT, getUserChannelProfile);
+router.route("/histery").get(verifyJWT, getWatchHistory);
 
 export default router;

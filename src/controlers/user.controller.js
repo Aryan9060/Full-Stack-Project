@@ -337,9 +337,149 @@ const updateCoverImage = asyncHandler(async (req, res) => {
 
     return res
       .status(200)
-      .json(new ApiResponse(200, updatedUser, "CoverImage updated successfully"));
+      .json(
+        new ApiResponse(200, updatedUser, "CoverImage updated successfully")
+      );
   } catch (error) {
     throw new ApiError(500, error?.message || "Failed to update coverImage");
+  }
+});
+
+//get user channel profile
+const getUserChannelProfile = asyncHandler(async (req, res) => {
+  try {
+    const { username } = req.params;
+    if (!username) {
+      throw new ApiError(400, "Username is required");
+    }
+
+    const chennal = await User.aggregate([
+      { $match: { username: username?.toLowerCase() } },
+      {
+        $lookup: {
+          from: "subscribers",
+          localField: "_id",
+          foreignField: "subscriber",
+          as: "Subscriber",
+        },
+      },
+      {
+        $lookup: {
+          from: "subscriptions",
+          localField: "_id",
+          foreignField: "channel",
+          as: "SubscribedTo",
+        },
+      },
+      {
+        $addFields: {
+          subscriberCount: {
+            $size: "$Subscriber",
+          },
+          subscribedToCount: {
+            $size: "$SubscribedTo",
+          },
+          isSubscriber: {
+            $cond: {
+              if: { $in: [req.user?._id, "$Subscriber.subscriber"] },
+              then: true,
+              else: false,
+            },
+          },
+          isSubscribedTo: { $in: [req.user?._id, "$SubscribedTo.channel"] },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          username: 1,
+          avatar: 1,
+          coverImage: 1,
+          email: 1,
+          fullName: 1,
+          subscriberCount: 1,
+          subscribedToCount: 1,
+          isSubscriber: 1,
+          isSubscribedTo: 1,
+        },
+      },
+    ]);
+
+    if (!chennal?.length) {
+      throw new ApiError(404, "Chaannal does not exist");
+    }
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          chennal[0],
+          "Fetched user channel profile successfully"
+        )
+      );
+  } catch (error) {}
+});
+
+//get watch history
+const getWatchHistory = asyncHandler(async (req, res) => {
+  try {
+    const user = User.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(req.user._id),
+        },
+      },
+      {
+        $lookup: {
+          from: "videos",
+          localField: "watchHistory",
+          foreignField: "_id",
+          as: "watchHistory",
+        },
+        pipeline: [
+          {
+            $lookup: {
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              as: "owner",
+              pipeline: [
+                {
+                  $project: {
+                    fullName: 1,
+                    username: 1,
+                    avatar: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            $addFields: {
+              owner: {
+                $firet: "$owner",
+              },
+            },
+          },
+        ],
+      },
+    ]);
+
+    if (!user?.length) {
+      throw new ApiError(404, "User not found");
+    }
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          user[0].watchHistory,
+          "Fetched watch history successfully"
+        )
+      );
+  } catch (error) {
+    throw new ApiError(500, error?.message || "Failed to get watch history");
   }
 });
 
@@ -351,4 +491,8 @@ export {
   chengeCurrentPassword,
   getCurrentUser,
   updateAccountDetails,
+  updateAvatar,
+  updateCoverImage,
+  getUserChannelProfile,
+  getWatchHistory,
 };
