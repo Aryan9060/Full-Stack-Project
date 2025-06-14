@@ -1,31 +1,51 @@
-import { model, Schema } from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
+import { Playlist } from "../models/playlist.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
-const playlistSchema = new Schema(
-  {
-    name: {
-      type: String,
-      required: true,
-    },
-    discription: {
-      type: String,
-    },
-    videos: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Video",
-      },
-    ],
-    owner: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-    },
-    // Add more fields as needed
-  },
-  {
-    timestamps: true,
-  }
-);
+const createPlaylist = asyncHandler(async (req, res) => {
+  const { name, description } = req.body;
 
-// Add any additional methods or hooks here
+  //TODO: create playlist
+});
 
-export const Playlist = model("Playlist", playlistSchema);
+const getUserPlaylists = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  //TODO: get user playlists
+});
+
+const getPlaylistById = asyncHandler(async (req, res) => {
+  const { playlistId } = req.params;
+  //TODO: get playlist by id
+});
+
+const addVideoToPlaylist = asyncHandler(async (req, res) => {
+  const { playlistId, videoId } = req.params;
+});
+
+const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
+  const { playlistId, videoId } = req.params;
+  // TODO: remove video from playlist
+});
+
+const deletePlaylist = asyncHandler(async (req, res) => {
+  const { playlistId } = req.params;
+  // TODO: delete playlist
+});
+
+const updatePlaylist = asyncHandler(async (req, res) => {
+  const { playlistId } = req.params;
+  const { name, description } = req.body;
+  //TODO: update playlist
+});
+
+export {
+  createPlaylist,
+  getUserPlaylists,
+  getPlaylistById,
+  addVideoToPlaylist,
+  removeVideoFromPlaylist,
+  deletePlaylist,
+  updatePlaylist,
+};

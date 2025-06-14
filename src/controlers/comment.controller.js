@@ -1,26 +1,25 @@
-import { model, Schema } from "mongoose";
-import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
+import mongoose from "mongoose";
+import { Comment } from "../models/comment.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
-const commentSchema = new Schema(
-  {
-    comment: {
-      type: String,
-      required: true,
-    },
-    owner: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-    },
-    video: {
-      type: Schema.Types.ObjectId,
-      ref: "Video",
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
+const getVideoComments = asyncHandler(async (req, res) => {
+  //TODO: get all comments for a video
+  const { videoId } = req.params;
+  const { page = 1, limit = 10 } = req.query;
+});
 
-commentSchema.plugin(mongooseAggregatePaginate);
+const addComment = asyncHandler(async (req, res) => {
+  // TODO: add a comment to a video
+});
 
-export const Comment = model("Comment", commentSchema);
+const updateComment = asyncHandler(async (req, res) => {
+  // TODO: update a comment
+});
+
+const deleteComment = asyncHandler(async (req, res) => {
+  // TODO: delete a comment
+});
+
+export { getVideoComments, addComment, updateComment, deleteComment };

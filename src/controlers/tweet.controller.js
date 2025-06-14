@@ -1,19 +1,24 @@
-import { model, Schema } from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
+import { Tweet } from "../models/tweet.model.js";
+import { User } from "../models/user.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
-const tweetSchema = new Schema(
-  {
-    content: {
-      type: String,
-      required: true,
-    },
-    owner: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
-  },
-  {
-    timestamps: true,
-  }
-);
+const createTweet = asyncHandler(async (req, res) => {
+  //TODO: create tweet
+});
 
-export const Tweet = model("Tweet", tweetSchema);
+const getUserTweets = asyncHandler(async (req, res) => {
+  // TODO: get user tweets
+});
+
+const updateTweet = asyncHandler(async (req, res) => {
+  //TODO: update tweet
+});
+
+const deleteTweet = asyncHandler(async (req, res) => {
+  //TODO: delete tweet
+});
+
+export { createTweet, getUserTweets, updateTweet, deleteTweet };
