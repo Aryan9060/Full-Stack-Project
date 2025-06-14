@@ -155,7 +155,6 @@ const logoutUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, {}, "user logged out successfully"));
 });
 
-
 //refreshAccessToken
 const refreshAccessToken = asyncHandler(async (req, res) => {
   try {
@@ -201,4 +200,155 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken };
+//change current password
+const chengeCurrentPassword = asyncHandler(async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const user = req.user;
+
+    if (!user) {
+      throw new ApiError(401, "Unauthorized user");
+    }
+
+    const isPasswordValidate = await user.isPasswordCurrect(currentPassword);
+
+    if (!isPasswordValidate) {
+      throw new ApiError(401, "Invalid current password");
+    }
+
+    user.password = newPassword;
+    await user.save({ validateBeforeSave: false });
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, "Password changed successfully"));
+  } catch (error) {
+    throw new ApiError(500, error?.message || "Failed to change password");
+  }
+});
+
+//get Current user
+const getCurrentUser = asyncHandler(async (req, res) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      throw new ApiError(401, "Unauthorized user");
+    }
+    return res
+      .status(200)
+      .json(new ApiResponse(200, user, "Fetched user successfully"));
+  } catch (error) {
+    throw new ApiError(500, error?.message || "Failed to get user details");
+  }
+});
+
+//upsate account details
+const updateAccountDetails = asyncHandler(async (req, res) => {
+  try {
+    const { fullName, email } = req.body;
+
+    if (!fullName && !email) {
+      throw new ApiError(401, "all fields are required");
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        $set: {
+          fullName,
+          email: email.toLowerCase(),
+        },
+      },
+      {
+        new: true,
+      }
+    ).select("-password -refreshToken");
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          updatedUser,
+          "Account details updated successfully"
+        )
+      );
+  } catch (error) {
+    throw new ApiError(
+      500,
+      error?.message || "Failed to update account details"
+    );
+  }
+});
+
+//upload Avatar
+const updateAvatar = asyncHandler(async (req, res) => {
+  try {
+    const avatarLoacalPath = req.file.avatar?.path;
+
+    if (!avatarLoacalPath) {
+      throw new ApiError(400, "Avatar file is required");
+    }
+
+    const avatar = await uploadCloudinary(avatarLoacalPath);
+
+    if (!avatar) {
+      throw new ApiError(500, "Failed to upload avatar to cloudinary");
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user?._id,
+      {
+        $set: { avatar: avatar.secure_url },
+      },
+      { new: true }
+    ).select("-password -refreshToken");
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, updatedUser, "Avatar updated successfully"));
+  } catch (error) {
+    throw new ApiError(500, error?.message || "Failed to update avatar");
+  }
+});
+
+//upload Avatar
+const updateCoverImage = asyncHandler(async (req, res) => {
+  try {
+    const coverImageLoacalPath = req.file.avatar?.path;
+
+    if (!coverImageLoacalPath) {
+      throw new ApiError(400, "Avatar file is required");
+    }
+
+    const coverImage = await uploadCloudinary(coverImageLoacalPath);
+
+    if (!coverImage) {
+      throw new ApiError(500, "Failed to upload coverImage to cloudinary");
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user?._id,
+      {
+        $set: { coverImage: coverImage.secure_url },
+      },
+      { new: true }
+    ).select("-password -refreshToken");
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, updatedUser, "CoverImage updated successfully"));
+  } catch (error) {
+    throw new ApiError(500, error?.message || "Failed to update coverImage");
+  }
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  chengeCurrentPassword,
+  getCurrentUser,
+  updateAccountDetails,
+};
