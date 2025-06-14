@@ -66,7 +66,7 @@ userSchema.methods.isPasswordCurrect = async function (password) {
 userSchema.methods.generateAccessToken = function () {
   return JWT.sign(
     {
-      _Id: this._Id,
+      _id: this._id,
       fullName: this.fullName,
       email: this.email,
       username: this.username,
