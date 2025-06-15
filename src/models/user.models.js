@@ -59,6 +59,8 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.methods.isPasswordCurrect = async function (password) {
+  console.log('this.password :-',await this.password,'password to compare :-', password);
+  
   return await bcrypt.compare(password, this.password);
 };
 
@@ -80,7 +82,7 @@ userSchema.methods.generateAccessToken = function () {
 userSchema.methods.generateRefreshToken = function () {
   return JWT.sign(
     {
-      _Id: this._Id,
+      _id: this._id,
     },
     process.env.REFRESH_TOKEN_SECRET,
     {

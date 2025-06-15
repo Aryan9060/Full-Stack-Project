@@ -1,9 +1,10 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
-import { User } from "../models/user.model.js";
-import { uploadCloudinary } from "../utils/cloudinary.js";
+import { User } from "../models/user.models.js";
+import uploadOnCloudinary from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import JWT from "jsonwebtoken";
+import deleteOnCloudinary from "../utils/deleteOnCloudinary.js";
 
 const options = { httpOnly: true, secure: true };
 
@@ -30,8 +31,8 @@ const registerUser = asyncHandler(async (req, res) => {
   // validation and data extraction
   const { fullName, email, password, username } = req.body;
 
-  console.log("Reruest from body :-", req.body);
-  console.log("Reruest from file :-", req.files);
+  console.log("Request from body :-", req.body);
+  console.log("Request from file :-", req.files);
 
   if (
     [fullName, email, password, username].some((field) => field?.trim() === "")
@@ -48,7 +49,7 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   // upload images to cloudinary and save url in db
-  const avatarLoacalPath = req.files?.avater[0]?.path;
+  const avatarLoacalPath = req.files?.avatar[0].path;
   let coverImageLocalPath;
   if (
     req.files &&
@@ -62,8 +63,8 @@ const registerUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Avater file is required");
   }
 
-  const avatar = await uploadCloudinary(avatarLoacalPath);
-  const coverImage = await uploadCloudinary(coverImageLocalPath);
+  const avatar = await uploadOnCloudinary(avatarLoacalPath);
+  const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
   if (!avatar) {
     throw new ApiError(400, "Avater file is required");
@@ -166,7 +167,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
     const decodedToken = JWT.verify(
       IncommingRefreshToken,
-      process.env.ACCESS_TOKEN_SECRET
+      process.env.REFRESH_TOKEN_SECRET
     );
 
     const user = await User.findById(decodedToken._id);
@@ -202,17 +203,19 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 //change current password
 const chengeCurrentPassword = asyncHandler(async (req, res) => {
   try {
-    const { currentPassword, newPassword } = req.body;
-    const user = req.user;
+    const { oldPassword, newPassword } = req.body;
+    const user = await User.findById(req.user._id);
+
+    console.log("old password :-", oldPassword, "new password :-", newPassword);
 
     if (!user) {
       throw new ApiError(401, "Unauthorized user");
     }
 
-    const isPasswordValidate = await user.isPasswordCurrect(currentPassword);
+    const isPasswordValidate = await user.isPasswordCurrect(oldPassword);
 
     if (!isPasswordValidate) {
-      throw new ApiError(401, "Invalid current password");
+      throw new ApiError(401, "Invalid old password");
     }
 
     user.password = newPassword;
@@ -246,7 +249,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
   try {
     const { fullName, email } = req.body;
 
-    if (!fullName && !email) {
+    if (!fullName || !email) {
       throw new ApiError(401, "all fields are required");
     }
 
@@ -283,13 +286,21 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
 //upload Avatar
 const updateAvatar = asyncHandler(async (req, res) => {
   try {
-    const avatarLoacalPath = req.file.avatar?.path;
+    const avatarLoacalPath = req.file?.path;
 
     if (!avatarLoacalPath) {
       throw new ApiError(400, "Avatar file is required");
     }
 
-    const avatar = await uploadCloudinary(avatarLoacalPath);
+    const deleteCoverImage = await deleteOnCloudinary(req.user.coverImage, {
+      resourse_type: "image",
+    });
+
+    if (!deleteCoverImage) {
+      throw new ApiError(500, "Failed to delete coverImage from cloudinary");
+    }
+
+    const avatar = await uploadOnCloudinary(avatarLoacalPath);
 
     if (!avatar) {
       throw new ApiError(500, "Failed to upload avatar to cloudinary");
@@ -311,16 +322,23 @@ const updateAvatar = asyncHandler(async (req, res) => {
   }
 });
 
-//upload Avatar
+//upload coverImage
 const updateCoverImage = asyncHandler(async (req, res) => {
   try {
-    const coverImageLoacalPath = req.file.avatar?.path;
+    const coverImageLoacalPath = req.file?.path;
 
     if (!coverImageLoacalPath) {
-      throw new ApiError(400, "Avatar file is required");
+      throw new ApiError(400, "CoverImage file is required");
     }
 
-    const coverImage = await uploadCloudinary(coverImageLoacalPath);
+    const deleteCoverImage = await deleteOnCloudinary(req.user.coverImage, {
+      resourse_type: "image",
+    });
+
+    if (!deleteCoverImage) {
+      throw new ApiError(500, "Failed to delete coverImage from cloudinary");
+    }
+    const coverImage = await uploadOnCloudinary(coverImageLoacalPath);
 
     if (!coverImage) {
       throw new ApiError(500, "Failed to upload coverImage to cloudinary");

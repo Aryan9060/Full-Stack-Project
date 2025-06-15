@@ -9,8 +9,10 @@ import {
   refreshAccessToken,
   registerUser,
   updateAccountDetails,
-} from "../controlers/user.controller.js";
-import { upload } from "../middlewares/multer.js";
+  updateAvatar,
+  updateCoverImage,
+} from "../controllers/user.controller.js";
+import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middlewate.js";
 
 const router = Router();
@@ -19,7 +21,7 @@ const router = Router();
 router.route("/register").post(
   upload.fields([
     {
-      name: "avater",
+      name: "avatar",
       maxCount: 1,
     },
     {
@@ -40,10 +42,10 @@ router.route("/current-user").get(verifyJWT, getCurrentUser);
 router.route("/update-account").put(verifyJWT, updateAccountDetails); //patch
 router
   .route("/upload-avatar")
-  .put(verifyJWT, upload.single("avater"), updateAccountDetails); //patch
+  .put(verifyJWT, upload.single("avatar"), updateAvatar); //patch
 router
   .route("/upload-cover-image")
-  .put(verifyJWT, upload.single("coverImage"), updateAccountDetails);
+  .put(verifyJWT, upload.single("coverImage"), updateCoverImage);
 router.route("/channel/:username").get(verifyJWT, getUserChannelProfile);
 router.route("/histery").get(verifyJWT, getWatchHistory);
 
