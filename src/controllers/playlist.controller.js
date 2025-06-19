@@ -4,6 +4,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
+// Create a new playlist for the current user
 const createPlaylist = asyncHandler(async (req, res) => {
   //TODO: create playlist
 
@@ -30,16 +31,15 @@ const createPlaylist = asyncHandler(async (req, res) => {
       .json(new ApiResponse(201, playlist, "Playlist created successfully"));
   } catch (error) {
     throw new ApiError(
-      error?.statusCode,
-      500,
+      error?.statusCode || 500,
       error?.message || "Failed to create playlist"
     );
   }
 });
 
+// Update a playlist by its ID
 const getUserPlaylists = asyncHandler(async (req, res) => {
   //TODO: get user playlists
-
   try {
     const { userId } = req.params;
 
@@ -60,13 +60,13 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
       );
   } catch (error) {
     throw new ApiError(
-      error?.statusCode,
-      500,
+      error?.statusCode || 500,
       error?.message || "Failed to get user's playlists"
     );
   }
 });
 
+//Get a playlist by its ID
 const getPlaylistById = asyncHandler(async (req, res) => {
   //TODO: get playlist by id
 
@@ -119,13 +119,13 @@ const getPlaylistById = asyncHandler(async (req, res) => {
       .json(new ApiResponse(200, playlist, "Fetched playlist successfully"));
   } catch (error) {
     throw new ApiError(
-      error?.statusCode,
-      500,
+      error?.statusCode || 500,
       error?.message || "Failed to get playlist"
     );
   }
 });
 
+//Add a video to a playlist by its ID
 const addVideoToPlaylist = asyncHandler(async (req, res) => {
   try {
     const { playlistId, videoId } = req.params;
@@ -158,13 +158,13 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
       );
   } catch (error) {
     throw new ApiError(
-      error?.statusCode,
-      500,
+      error?.statusCode || 500,
       error?.message || "Failed to add video to playlist"
     );
   }
 });
 
+// Remove a playlist by its ID
 const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
   // TODO: remove video from playlist
   try {
@@ -202,13 +202,13 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
       );
   } catch (error) {
     throw new ApiError(
-      error?.statusCode,
-      500,
+      error?.statusCode || 500,
       error?.message || "Failed to remove video from playlist"
     );
   }
 });
 
+// Delete a playlist by its ID
 const deletePlaylist = asyncHandler(async (req, res) => {
   // TODO: delete playlist
   try {
@@ -233,13 +233,13 @@ const deletePlaylist = asyncHandler(async (req, res) => {
       .json(new ApiResponse(200, {}, "Playlist deleted successfully"));
   } catch (error) {
     throw new ApiError(
-      error?.statusCode,
-      500,
+      error?.statusCode || 500,
       error?.message || "Failed to delete playlist"
     );
   }
 });
 
+// Update a playlist by its ID
 const updatePlaylist = asyncHandler(async (req, res) => {
   //TODO: update playlist
   try {
@@ -275,8 +275,7 @@ const updatePlaylist = asyncHandler(async (req, res) => {
       );
   } catch (error) {
     throw new ApiError(
-      error?.statusCode,
-      500,
+      error?.statusCode || 500,
       error?.message || "Failed to update playlist"
     );
   }
