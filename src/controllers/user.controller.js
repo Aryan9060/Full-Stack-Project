@@ -374,10 +374,10 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
       { $match: { username: username?.toLowerCase() } },
       {
         $lookup: {
-          from: "subscribers",
+          from: "subscriptions",
           localField: "_id",
           foreignField: "subscriber",
-          as: "Subscriber",
+          as: "subscriber",
         },
       },
       {
@@ -385,25 +385,25 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
           from: "subscriptions",
           localField: "_id",
           foreignField: "channel",
-          as: "SubscribedTo",
+          as: "subscribedTo",
         },
       },
       {
         $addFields: {
           subscriberCount: {
-            $size: "$Subscriber",
+            $size: "$subscriber",
           },
           subscribedToCount: {
-            $size: "$SubscribedTo",
+            $size: "$subscribedTo",
           },
           isSubscriber: {
             $cond: {
-              if: { $in: [req.user?._id, "$Subscriber.subscriber"] },
+              if: { $in: [req.user?._id, "$subscriber.subscriber"] },
               then: true,
               else: false,
             },
           },
-          isSubscribedTo: { $in: [req.user?._id, "$SubscribedTo.channel"] },
+          isSubscribedTo: { $in: [req.user?._id, "$subscribedTo.channel"] },
         },
       },
       {
@@ -475,7 +475,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
           {
             $addFields: {
               owner: {
-                $firet: "$owner",
+                $first: "$owner",
               },
             },
           },

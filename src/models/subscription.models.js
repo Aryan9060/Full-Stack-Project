@@ -1,15 +1,15 @@
 import { model, Schema } from "mongoose"
 
 
-const subscriberSchema = new Schema({
+const subscriptionSchema = new Schema({
     subscriber:{
         type:Schema.Types.ObjectId,
         ref:'User'
     },
-    chennal:{
+    channal:{
         type:Schema.Types.ObjectId,
         ref:'Channel'
     },
 })
 
-export const Subscriber = model('Subscriber',subscriberSchema)
+export const Subscription = model('Subscription',subscriptionSchema)

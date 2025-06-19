@@ -9,6 +9,8 @@ import deleteOnCloudinary from "../utils/deleteOnCloudinary.js";
 
 //Get all videos in a paginated manner
 const getAllVideos = asyncHandler(async (req, res) => {
+  //TODO: get all videos based on query, sort, pagination
+
   try {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
 
@@ -28,8 +30,6 @@ const getAllVideos = asyncHandler(async (req, res) => {
     res
       .status(200)
       .json(new ApiResponse(200, videos, "Fetched videos successfully"));
-
-    //TODO: get all videos based on query, sort, pagination
   } catch (error) {
     throw new ApiError(500, error.message);
   }
@@ -112,7 +112,7 @@ const getVideoById = asyncHandler(async (req, res) => {
   try {
     const { videoId } = req.params;
 
-    if (!videoId) {
+    if (!videoId || videoId == ":videoId") {
       throw new ApiError(400, "Video ID is required");
     }
 
@@ -232,7 +232,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
 const togglePublishStatus = asyncHandler(async (req, res) => {
   try {
     const { videoId } = req.params;
-    
+
     if (!videoId) {
       throw new ApiError(400, "Video ID is required");
     }
