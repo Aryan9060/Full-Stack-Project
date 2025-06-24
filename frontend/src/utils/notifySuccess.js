@@ -6,8 +6,8 @@
         position: "top-center",
         autoClose: 3000,
         closeOnClick: false,
-        pauseOnHover: true,
-        draggable: false,
+        pauseOnHover: false,
+        draggable: true,
     });
  };
 

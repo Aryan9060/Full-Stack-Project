@@ -1,14 +1,17 @@
 import Container from "../container/Container";
-import { Input } from "../inputField/Input";
+import { Input } from "../input/Input";
 import Button from "../button/Button";
 import avatar from "../../img/avatar.jpg";
 import { FaPlus } from "../Icon";
 import { useState } from "react";
-import notifySuccess from "../../utils/notifySuccess";
 import notifyError from "../../utils/notifyError";
-import axios from "axios";
+import { useNavigate } from "react-router";
+import { useDispatch } from "react-redux";
 
 const Registation = (e) => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+
   const [form, setForm] = useState({
     fullName: "",
     username: "",
@@ -38,7 +41,7 @@ const Registation = (e) => {
       }
     }
 
-    e.preventDefault();
+    // e.preventDefault();
 
     const formData = new FormData();
     formData.append("avatar", form.avatar);
@@ -68,13 +71,13 @@ const Registation = (e) => {
       avatar: "",
     });
   };
-  console.log("form :- ", form);
+  // console.log("form :- ", form);
 
   return (
     <Container
       className={` max-w-[500px] w-[90vw] sm:w-full rounded flex justify-center items-center flex-col shadow-2xl`}
     >
-      <div className="text-3xl font-bold text-center mt-3 text-orange-600">
+      <div className="text-3xl font-bold text-center mt-3 text-orange-600 cursor-default">
         Registation
       </div>
 
@@ -102,7 +105,8 @@ const Registation = (e) => {
       <div className="w-full">
         <Input
           label="Full Name :"
-          className=""
+          className=" w-full mt-1 sm:w-6/8
+           focus-within:ring-orange-600 focus-within:ring-1 border-0 ring-1 outline-none"
           value={form.fullName}
           required
           name="fullName"
@@ -111,7 +115,8 @@ const Registation = (e) => {
         />
         <Input
           label="Username :"
-          className=""
+          className=" w-full mt-1 sm:w-6/8
+           focus-within:ring-orange-600 focus-within:ring-1 border-0 ring-1 outline-none"
           value={form.username}
           required={true}
           name="username"
@@ -121,7 +126,8 @@ const Registation = (e) => {
         <Input
           type="email"
           label="Email :"
-          className=""
+          className=" w-full mt-1 sm:w-6/8
+           focus-within:ring-orange-600 focus-within:ring-1 border-0 ring-1 outline-none"
           value={form.email}
           required={true}
           name="email"
@@ -131,7 +137,8 @@ const Registation = (e) => {
         <Input
           type="password"
           label="Password :"
-          className=""
+          className=" w-full mt-1 sm:w-6/8
+           focus-within:ring-orange-600 focus-within:ring-1 border-0 ring-1 outline-none"
           value={form.password}
           required={true}
           name="password"
@@ -144,12 +151,17 @@ const Registation = (e) => {
           type="submit"
           children="Register"
           onClick={(e) => formSubmitHandler(e)}
-          className="bg-orange-600 w-[20rem] hover:bg-orange-500"
+          className="bg-orange-600 w-[200px] max-w-[15rem] hover:bg-orange-500 cursor-pointer "
         />
       </div>
       <h2 className=" mb-5">
         I already have an account{" "}
-        <span className="text-blue-600 underline font-bold">Login.</span>
+        <span
+          onClick={() => navigate("/")}
+          className="text-blue-600 underline font-bold cursor-pointer hover:text-blue-700"
+        >
+          Login.
+        </span>
       </h2>
     </Container>
   );

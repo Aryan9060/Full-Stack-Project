@@ -6,7 +6,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import JWT from "jsonwebtoken";
 import deleteOnCloudinary from "../utils/deleteOnCloudinary.js";
 
-const options = { httpOnly: true, secure: true };
+const options = { httpOnly: true, secure: false };
 
 // Generate access and refresh tokens for a user
 const generateAccessAndRefreshTokens = async (userId) => {
@@ -31,6 +31,7 @@ const registerUser = asyncHandler(async (req, res) => {
   // validation and data extraction
   try {
     const { fullName, email, password, username } = req.body;
+console.log('req.body: ', req.body);
 
     if (
       [fullName, email, password, username].some(
@@ -45,12 +46,16 @@ const registerUser = asyncHandler(async (req, res) => {
     });
 
     if (existingUser) {
-      res.status(409).json({ message: "User already exists" });
-      // throw new ApiError(408, "User already exists");
+      res.status(409).json({ message: "User already registered" });
+      throw new ApiError(408, "User already registered");
     }
 
+    console.log('req files: ', req.files);
+    
     // upload images to cloudinary and save url in db
     const avatarLoacalPath = req.files?.avatar[0].path;
+    console.log('avatarLoacalPath: ', avatarLoacalPath);
+    
     let coverImageLocalPath;
     if (
       req.files &&
@@ -102,45 +107,59 @@ const registerUser = asyncHandler(async (req, res) => {
 
 //user Login
 const loginUser = asyncHandler(async (req, res) => {
-  const { email, username, password } = req.body;
-  if (!username && !email) {
-    throw new ApiError(400, "Username or email is required");
-  }
+  try {
+    const { email, username, password } = req.body;
 
-  const user = await User.findOne({
-    $or: [{ email }, { username }],
-  });
+    if (!username && !email) {
+      throw new ApiError(400, "Username or email is required");
+    }
 
-  if (!user) {
-    throw new ApiError(401, "user not found");
-  }
+    if (password && password.trim() === "") {
+      throw new ApiError(400, "Password is required");
+    }
 
-  const isPasswordValidate = await user.isPasswordCurrect(password);
+    const user = await User.findOne({
+      $or: [{ email }, { username }],
+    });
 
-  if (!isPasswordValidate) {
-    throw new ApiError(401, "Invalid credentials");
-  }
+    if (!user) {
+      res.status(401).json({ message: "User not found" });
+      throw new ApiError(401, "User not found");
+    }
 
-  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
-    user._id
-  );
+    const isPasswordValidate = await user.isPasswordCurrect(password);
 
-  // const options = {
-  //   httpOnly: true,
-  //   secure: true,
-  // };
+    if (!isPasswordValidate) {
+      res.status(401).json({ message: "Invalid credentials" });
+      throw new ApiError(401, "Invalid credentials");
+    }
 
-  return res
-    .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
-    .json(
-      new ApiResponse(
-        200,
-        { user, accessToken, refreshToken },
-        "User logged in successfully"
-      )
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+      user._id
     );
+
+    // const options = {
+    //   httpOnly: true,
+    //   secure: true,
+    // };
+
+    return res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json(
+        new ApiResponse(
+          200,
+          { user, accessToken, refreshToken },
+          "User logged in successfully"
+        )
+      );
+  } catch (error) {
+    throw new ApiError(
+      error?.statusCode || 500,
+      error?.message || "Failed to login user"
+    );
+  }
 });
 
 //user Logout
